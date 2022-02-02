@@ -1,19 +1,68 @@
-vscode how to install  in VSCode
 # vscode-dfdl README
 
 The "vscode-dfdl"extension.provides auto completion for Data Format Description Language (DFDL) schemas.
 
+## Set the editor to dfdl mode
+![](TurnOnDfdlMode.gif)
 ## Features
 
-Tags can be auto suggested using control space to produce a list of context sensitive items.  Inside a
-tag a space or carriage return will trigger a list of context sensitive attribute suggestions.
+Auto suggested is triggered using control space or typing the beginning characters of an item.
+Typing one or more unique characters will further limit the results.
+![](CtrlSpaceTrigger.gif)
+![](CharacterTrigger.gif)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! 
-We recommend short, focused animations that are easy to follow.
+Typing in a blank space outside of an XML tag will also trigger auto suggestion.
+![](CharacterTrigger2.gif)
+
+The tab key is used to complete an auto-complete item within an XML tag.
+The '>' or '/' characters are used to close and XML tag
+![](ExitAndEndTag.gif)
+
+After auto complete is triggered, typing the initial character or characters will limit the suggestion results.
+Typing the initial characters and one or more unique characters will further limit the results.
+![](UniqueCharacters.gif)
+
+Inside an XML tag a space or carriage return will trigger a list of context sensitive attribute suggestions.
+![](AttributeSuggestions.gif)
+
 
 ## Requirements
 
-No additional requirements are needed.
+Node.js (https://nodejs.org/en/download/)
+VS Code (https://code.visualstudio.com/download)
+
+Open a terminal window in VS Code. Run:
+  npm install typescript
+
+## Suggestions
+
+After TypeScript is installed. Run:
+npm run watch
+
+Watch will automatically compile code when it changes
+After watch runs, fix any problems in the Problems tab
+
+## Package the Extension
+
+In a VS Code terminal window, run:
+  npm install -g vsce
+
+After the vsce install completes, run:
+  vsce package
+
+to the three warnings type 'y'.
+
+The package vscode-dfdl-0.0.1.vsix should be in the project director.
+
+## Install the Extension
+
+Close VS Code if it is open. From an OS Command line, run:
+  code 'path to vsix file'\vscode-dfdl-0.0.1.vsix
+
+Re-open VS Code, open the pallet (ctrl+shift+P)
+  select or type 'Change Language Mode'
+  choose 'dfdl'
+
 ## Extension Settings
 
 None
@@ -27,11 +76,6 @@ Syntax and semantic colorization isn't implemented.
 
 ## Release Notes
 
-First beta release. Feedback is appreciated. To install run the code command with the path to the
-vsix file. Ex:
-> code Downloads\vscode-dfdl-0.0.1.vsix
-
-After installing the extension, open the pallet (ctrl+shift+P) select 'Change Language Mode' and
-choose 'dfdl'.
+First beta release. Feedback is appreciated.
 
 -----------------------------------------------------------------------------------------------------------
