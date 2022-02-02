@@ -12,7 +12,7 @@ Auto suggest is triggered using control space or typing the beginning characters
 Typing one or more unique characters will further limit the results.
 ![](CharacterTrigger.gif)
 
-Typing in characters outside of an XML tag will also trigger auto suggestion.
+Typing characters outside of an XML tag will also trigger auto suggestion.
 ![](CharacterTrigger2.gif)
 
 The tab key is used to complete an auto-complete item within an XML tag.
