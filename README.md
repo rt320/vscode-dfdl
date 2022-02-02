@@ -7,8 +7,9 @@ The "vscode-dfdl"extension.provides auto completion for Data Format Description 
 ## Features
 
 Auto suggested is triggered using control space or typing the beginning characters of an item.
-Typing one or more unique characters will further limit the results.
 ![](CtrlSpaceTrigger.gif)
+
+Typing one or more unique characters will further limit the results.
 ![](CharacterTrigger.gif)
 
 Typing in a blank space outside of an XML tag will also trigger auto suggestion.
@@ -41,6 +42,9 @@ npm run watch
 
 Watch will automatically compile code when it changes
 After watch runs, fix any problems in the Problems tab
+
+Run the extension in debug mode
+![](StartDebugMode.gif)
 
 ## Package the Extension
 
