@@ -6,13 +6,13 @@ The "vscode-dfdl"extension.provides auto completion for Data Format Description 
 ![](TurnOnDfdlMode.gif)
 ## Features
 
-Auto suggested is triggered using control space or typing the beginning characters of an item.
+Auto suggest is triggered using control space or typing the beginning characters of an item.
 ![](CtrlSpaceTrigger.gif)
 
 Typing one or more unique characters will further limit the results.
 ![](CharacterTrigger.gif)
 
-Typing in a blank space outside of an XML tag will also trigger auto suggestion.
+Typing in characters outside of an XML tag will also trigger auto suggestion.
 ![](CharacterTrigger2.gif)
 
 The tab key is used to complete an auto-complete item within an XML tag.
