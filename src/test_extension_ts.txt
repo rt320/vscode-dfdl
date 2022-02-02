@@ -1,0 +1,460 @@
+import { cursorTo, moveCursor } from 'readline';
+import * as vscode from 'vscode';
+
+export function activate(context: vscode.ExtensionContext) {
+
+	const provider1 = vscode.languages.registerCompletionItemProvider('dfdl', {
+
+		provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+
+			const wholeLine = document.lineAt(position).text.substr(0, position.character);
+			console.log('in main completion provider: ' + wholeLine);
+			if(wholeLine.includes('"{')) {
+				return undefined;					
+			}
+		// a simple completion item which inserts `Hello World!`
+			//const simpleCompletion = new vscode.CompletionItem('Hello World!');
+			
+			// a completion item that inserts its text as snippet,
+			// the `insertText`-property is a `SnippetString` which will be
+			// honored by the editor.
+			const xmlVersion = new vscode.CompletionItem('xml version');
+			xmlVersion.insertText = new vscode.SnippetString('<?xml version="1.0" encoding="UTF-8"?>\n$0');
+
+			const xsSchema = new vscode.CompletionItem('xs:schema');
+			xsSchema.insertText = new vscode.SnippetString('<xs:schema xmlns:xs="http://www.w3.org2001/xmlSchema"\n\t\txmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"\n\t\txmlns:daf="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext"\n\t\txmlns:fn="http:/www.w3.org/2005/xpath-functions"\n\t\txmlns:math="www.w3.org/2005/xpath-functions/math" elementFormDefault="qualified">\n$0');
+
+			const xsElement = new vscode.CompletionItem('xs:element name');
+			xsElement.insertText = new vscode.SnippetString('<xs:element name="$1"$0');
+			//xsElement.insertText = new vscode.SnippetString('<xs:element name="$1"$0>\n\n</xs:element>');
+			xsElement.documentation = new vscode.MarkdownString("A new dfdl item");
+		
+			const xsElementRef = new vscode.CompletionItem('xs:element ref');
+			xsElementRef.insertText = new vscode.SnippetString('<xs:element ref="$1"$0');
+			//xsElementRef.insertText = new vscode.SnippetString('<xs:element ref="$1"$0>\n\n</xs:element>');
+			xsElementRef.documentation = new vscode.MarkdownString("A new dfdl reference to an item");
+
+			const xsGroup = new vscode.CompletionItem('xs:group name');
+			xsGroup.insertText = new vscode.SnippetString('<xs:group name = "$1">\n\t$0\n</xs:group>');
+			//xsGroup.documentation = new vscode.MarkdownString('');
+
+			const xsGroupRef = new vscode.CompletionItem('xs:group ref');
+			xsGroupRef.insertText = new vscode.SnippetString('<xs:group ref="$1"$0');
+			//xsGroupRef.insertText = new vscode.SnippetString('<xs:group ref="$1"$0>\n\n</xs:element>');
+			xsGroupRef.documentation = new vscode.MarkdownString("A new dfdl reference to an item");
+
+			const dfdlAssert = new vscode.CompletionItem('dfdl:assert');
+			dfdlAssert.insertText = new vscode.SnippetString('<xs:annotation>\n\t<xs:appinfo source="http://www.ogf.org/dfdl/">\n\t\t<dfdl:assert>"<$1>"\n\t</xs:appinfo>\n</xs:annotation></dfdl:assert>$0')
+			dfdlAssert.documentation = new vscode.MarkdownString("dfdl assertion test");
+		
+			const dfdlDiscriminator = new vscode.CompletionItem('dfdL:discriminator');
+			dfdlDiscriminator.insertText = new vscode.SnippetString('<xs:annotation>\n\t<xs:appinfo source="http://www.ogf.org/dfdl/">\n\t\t<dfdl:discriminator test="{$1}"/>\n\t</xs:appinfo>\n</xs:annotation>$0');
+			dfdlDiscriminator.documentation = new vscode.MarkdownString('dfdl discriminator test');
+
+			const dfdlHiddenGroupRef = new vscode.CompletionItem('dfdl:hiddenGroupRef');
+			dfdlHiddenGroupRef.insertText = new vscode.SnippetString('<xs:sequence dfdl:hiddenGroupRef="$1"/>\n$0');
+			//dfdlHiddenGroupRef.documentation = new vscode.MarkdownString('Hidden group reference');
+		
+			const defaultDfdlFormat = new vscode.CompletionItem('dfdl:format');
+			defaultDfdlFormat.insertText = new vscode.SnippetString("<xs:annotation>\n\t<xs:appinfo source=\"http://www.ogf.org/dfdl/\">\n\t\t<dfdl:format alignmentUnits=${1|\"bits\",\"bytes\"|}\n\t\t\tlengthUnits=${2|\"bits\",\"bytes\",\"characters\"|}\n\t\t\trepresentation=${3|\"binary\",\"text\"|}\n\t\t\tbinaryNumberRep=${4|\"binary\",\"packed\",\"bcd\",\"ibm4690Packed\"|}\n\t\t\tbyteOrder=${5|\"bigEndian\",\"littleEndian\"|}\n\t\t\tbitOrder=${6|\"mostSignificantBitFirst\",\"leastSignificantBitFirst\"|}\n\t\t\tlengthKind=${7|\"explicit\",\"delimited\",\"implicit\",\"prefixed\",\"pattern\",\"endOfParent\"|}\n\t\t\talignment=${8|\"1\",\"implicit\"|}\n\t\t\tencodingErrorPolicy=${9|\"error\",\"replace\"|}\n\t\t\tbinaryFloatRep=${10|\"ieee\",\"ibm390Hex\"|}\n\t\t\tcalendarPatternKind=${11|\"explicit\",\"implicit\"|}\n\t\t\tdocumentFinalTerminatorCanBeMissing=${12|\"yes\",\"no\"|}\n\t\t\temptyValueDelimiterPolicy=${13|\"initiator\",\"terminator\",\"both\",\"none\"|}\n\t\t\tescapeSchemeRef=$14\"\"\n\t\t\tfillByte=$15\"\"\n\t\t\tfloating=${16|\"no\",\"yes\"|}\n\t\t\tignoreCase=${17|\"no\",\"yes\"|}\n\t\t\tinitiatedContent=${18|\"no\",\"yes\"|}\n\t\t\tinitiator=$19\"\"\n\t\t\tleadingSkip=$20\"\"\n\t\t\tseparator=$21\"\"\n\t\t\tseparatorPolicy=$22\"suppressed\"\n\t\t\tseparatorSupressionPolicy=${23|\"anyEmpty\",\"never\",\"trailingEmpty\",\"trailingEmptyStrict\"|}\n\t\t\toutputNewLine=${24|\"%CR\",\"LF\",\"%CR,%LF;\"|}\n\t\t\ttextStandardZeroRep=$25\"0\"\n\t\t\ttextStandardInfinityRep=$26\"Inf\"\n\t\t\ttextStandardExponentRep=$27\"E\"\n\t\t\ttextStandardNaNRep=$28\"NaN\"\n\t\t\ttextNumberPattern=$29\"#,##0.###;-#,##0.###\"\n\t\t\ttextNumberRounding=${30|\"explicit\",\"pattern\"|}\n\t\t\ttextNumberRoundingMode=${31|\"roundCeiling\",\"roundFloor\",\"roundDown\",\"roundUp\",\"roundHalfEven\",\"roundHalfDown\",\"roundHalfUp\",\"roundUnnecessary\"|}\n\t\t\ttextNumberRoundingIncrement=$32\"0\"\n\t\t\ttextStandardGroupingSeparator=$33\",\"\n\t\t\tseparatorPosition=${34|\"infix\",\"postFix\",\"prefix\"|}\n\t\t\tsequenceKind=${35|\"ordered\",\"unordered\"|}\n\t\t\tterminator=$36\"\"\n\t\t\ttextBidi=$37\"no\"\n\t\t\ttextNumberCheckPolicy=${38|\"lax\",\"strict\"|}\n\t\t\ttextNumberRep=${39|\"standard\",\"zoned\"|}\n\t\t\ttextOutputMinLength=$40\"0\"\n\t\t\ttextPadKind=${41|\"none\",\"padChar\"|}\n\t\t\ttextStandardBase=$42\"10\"\n\t\t\ttextTrimKind=${43|\"none\",\"padChar\"|}\n\t\t\ttrailingSkip=$44\"0\"\n\t\t\ttruncateSpecifiedLengthString=${45|\"no\",\"yes\"|}\n\t\t\tutf16Width=${46|\"fixed\",\"variable\"|}\n\t\t\tencoding=${47|\"US-ASCII\",\"ASCII\",\"UTF-8\",\"UTF-16\",\"UTF-16BE\",\"UTF-16LE\",\"ISO-8859-1\"|}\n\t\t\tnilKind=${48|\"literalCharacter\",\"literalValue\",\"logicalValue\"|}\n\t\t\tnilValueDelimiterPolicy=${49|\"initiator\",\"terminator\",\"both\",\"none\"|}\n\t\t\toccursCountKind=${50|\"expression\",\"fixed\",\"implicit\",\"parsed\",\"stopValue\"|}\n\t\t\tchoiceLengthKind=${51|\"explicit\",\"implicit\"|}/>\n\t</xs:appinfo>\n</xs:annotation>\n$0");
+
+			// a completion item that can be accepted by a commit character,
+			// the `commitCharacters`-property is set which means that the completion will
+			// be inserted and then the character will be typed.
+			/*
+			const commitCharacterCompletion = new vscode.CompletionItem('console');
+			commitCharacterCompletion.commitCharacters = ['.'];
+			commitCharacterCompletion.documentation = new vscode.MarkdownString('Press `.` to get `console.`');
+			*/
+			
+			//annotationBlock.command = { command: 'editor.action.triggerSuggest', title: 'trigger annotation completion' };
+			//appinfoBlock.command = { command: 'editor.action.triggerSuggest', title: 'trigger appinfo completion' };
+			const annotationBlock = new vscode.CompletionItem('xs:annotation');
+			//annotationBlock.kind = vscode.CompletionItemKind.Keyword;
+			annotationBlock.insertText = new vscode.SnippetString('<xs:annotation>\n\t<xs:appinfo source="http://www.ogf.org/dfdl/">\n\t\t$0\n\t</xs:appinfo>\n</xs:annotation>');
+			const appinfoBlock = new vscode.CompletionItem('xs:appinfo');
+			//appinfoBlock.kind = vscode.CompletionItemKind.Keyword;
+			appinfoBlock.insertText = new vscode.SnippetString('<xs:annotation>\n\t<xs:appinfo source="http://www.ogf.org/dfdl/">\n\t\t$0\n\t</xs:appinfo>\n</xs:annotation>');
+
+			const xsComplexType = new vscode.CompletionItem('xs:complexType');
+			//xsComplexType.insertText = new vscode.SnippetString('<xs:complexType>\n$0');
+			xsComplexType.insertText = new vscode.SnippetString('<xs:complexType>\n\t$0\n</xs:complexType>');
+			xsComplexType.documentation = new vscode.MarkdownString("Starts a complex type definition");
+
+			const xsSequence = new vscode.CompletionItem('xs:sequence');
+			//xsSequence.insertText = new vscode.SnippetString('<xs:sequence>\n$0');
+			xsSequence.insertText = new vscode.SnippetString('<xs:sequence>\n\t$0\n</xs:sequence>');
+			//xsSequence.documentation = new vscode.MarkdownString("");
+
+			const xsChoice = new vscode.CompletionItem('xs:choice');
+			xsChoice.insertText = new vscode.SnippetString('<xs:choice>\n\t$0\n</xs:choice>');
+			//xsChoice.documentation = new vscode.MarkdownString("");
+
+			// a completion item that retriggers IntelliSense when being accepted,
+			// the `command`-property is set which the editor will execute after 
+			// completion has been inserted. Also, the `insertText` is set so that 
+			// a space is inserted after `new`
+			
+			//const commandCompletion = new vscode.CompletionItem('new ');
+			//commandCompletion.kind = vscode.CompletionItemKind.Keyword;
+			//commandCompletion.insertText = 'new ';
+			//commandCompletion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
+		
+		// return all completion items as array
+			return [
+				xmlVersion,
+				xsSchema,
+				defaultDfdlFormat,
+				dfdlAssert,
+				dfdlDiscriminator,
+				appinfoBlock,
+				annotationBlock,
+				xsComplexType,
+				xsSequence,
+				xsChoice,
+				xsElement,
+				xsElementRef,
+				xsGroup,
+				dfdlHiddenGroupRef,
+			];
+		}
+	});
+
+	const elementSpaceTriggerProvider = vscode.languages.registerCompletionItemProvider(
+		'dfdl.xsd',
+		{
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				const wholeLine = document.lineAt(position).text.substr(0, position.character);
+				console.log('in elementspacetrigger: ' + wholeLine);
+				if(wholeLine.includes('"{')) {
+					return undefined;					
+				}
+				const dfdlDefineFormat = new vscode.CompletionItem("dfdl:defineFormat");
+				dfdlDefineFormat.insertText = new vscode.SnippetString('<dfdl:defineFormat name="$1" >\n\t$2\n</dfdl:defineFormat>\n$0');
+				dfdlDefineFormat.documentation = new vscode.MarkdownString("dfdl format name and configuration");
+			
+				const dfdlDefineEscape = new vscode.CompletionItem('dfdl:defineEscapeScheme');
+				dfdlDefineEscape.insertText = new vscode.SnippetString('<dfdl:defineEscapeScheme name=$1 >\n\t$0,/dfdl:defineEscapeScheme>\n');
+				dfdlDefineEscape.documentation = new vscode.MarkdownString("dfdl escape character definition");
+			
+				const xmlType = new vscode.CompletionItem('type=');
+				xmlType.insertText = new vscode.SnippetString('type=\"${1|xs:string,xs:decimal,xs:float,xs:double,xs:integer,xs:nonNegativeInteger,xs:int,xs:unsignedint,xs:short,xs:unsignedShort,xs:long,xs:unsignedLong,xs:byte,xs:unsignedByte,xs:hexBinary,xs:boolean|}\"$0');
+				xmlType.documentation = new vscode.MarkdownString("attribute to specify a simple type element type")
+			
+				const minOccurs = new vscode.CompletionItem('minOccurs=');
+				minOccurs.insertText = new vscode.SnippetString('minOccurs="${1|0,1|}\"$0');
+				minOccurs.documentation = new vscode.MarkdownString("mininum number of times element will occur");
+			
+				const maxOccurs = new vscode.CompletionItem('maxOccurs=');
+				maxOccurs.insertText = new vscode.SnippetString('maxOccurs="${1|0,1,unbounded|}\"$0');
+				maxOccurs.documentation = new vscode.MarkdownString("maximum number of times element will occur");
+			
+				const dfdlOccursCount = new vscode.CompletionItem("dfdl:occursCount=");
+				dfdlOccursCount.insertText = new vscode.SnippetString("dfdl:occursCount=\"$1\"$0");
+				dfdlOccursCount.documentation = new vscode.MarkdownString("dfdl:occursCount property takes an expression which commonly looks in the Infoset via an expression, to obtain the count from another element.");
+			
+				const dfdlOccursCountKind = new vscode.CompletionItem('dfdl:occursCountKind=');
+				dfdlOccursCountKind.insertText = new vscode.SnippetString("dfdl:occursCountKind=\"${1|expression,fixed,implicit,parsed,stopValue|}\"$0");
+				dfdlOccursCountKind.documentation = new vscode.MarkdownString("occursCountKind can be expression, fixed, implicit, parsed, stopValue");
+			
+				const dfdlLength = new vscode.CompletionItem('dfdl:length=');
+				dfdlLength.insertText = new vscode.SnippetString("dfdl:length=\"$1\"$0");
+				dfdlLength.documentation = new vscode.MarkdownString("length can be an expression that resolves to an unsigned integer, or a literal unsigned integer");
+			
+				const dfdlLengthKind = new vscode.CompletionItem('dfdl:lengthKind=');
+				dfdlLengthKind.insertText = new vscode.SnippetString("lengthKind=\"${1|delimited,fixed,explicit,implicit,prefixed,pattern,endOfParent|}\"$0");
+				dfdlLengthKind.documentation = new vscode.MarkdownString("lengthKind can be delimited, fixed, explicit, implicit, prefixed,pattern, or endOfParent");
+			
+				const dfdlLengthUnits = new vscode.CompletionItem("dfdl:lengthUnits=");
+				dfdlLengthUnits.insertText = new vscode.SnippetString("dfdl:lengthUnits=\"${1|bits,bytes,characters|}\"$0");
+				dfdlLengthUnits.documentation = new vscode.MarkdownString("lengthUnits can be specified as bits, bytes, or characters");
+			
+				const dfdlLengthPattern = new vscode.CompletionItem('dfdl:lengthPattern=');
+				dfdlLengthPattern.insertText = new vscode.SnippetString("dfdl:lengthPattern=\"$1\"$0");
+				dfdlLengthPattern.documentation = new vscode.MarkdownString("lengthPattern takes a regular expression which is used to scan the data stream for matching data");
+			
+				const xmlEncoding = new vscode.CompletionItem('dfdl:encoding=');
+				xmlEncoding.insertText = new vscode.SnippetString("encoding=\"${1|US-ASCII,ASCII,UTF-8,UTF-16,UTF-16BE,UTF-16LE,ISO-8859-1|}\"$0");
+				xmlEncoding.documentation = new vscode.MarkdownString("encoding can be US-ASCII, ASCII, UTF-8, UTF-16, UTF-16BE UTF-16LE, or ISO-8859-1"); 
+			
+				const dfdlInputValueCalc = new vscode.CompletionItem("dfdl:inputValueCalc=");
+				dfdlInputValueCalc.insertText = new vscode.SnippetString("dfdl:inputValueCalc=\"{$1}\"$0");
+				dfdlInputValueCalc.documentation = new vscode.MarkdownString("An expression that calculates the value of the element when parsing");
+			
+				const dfdlOutputValueCalc = new vscode.CompletionItem("dfdl:outputValueCalc=");
+				dfdlOutputValueCalc.insertText = new vscode.SnippetString("dfdl:outputValueCalc=\"{$1}\"$0");
+				dfdlOutputValueCalc.documentation = new vscode.MarkdownString("An expression that calculates the value of the current element when unparsing");
+							const dfdlAlignment = new vscode.CompletionItem("dfdl:alignment=");
+				dfdlAlignment.insertText = new vscode.SnippetString('dfdl:alignment=\"${1|1,2,implicit|}\"$0');
+				dfdlAlignment.documentation = new vscode.MarkdownString("Alignment required for the beginning of the item.\nCan be non-negative integer or 'implicit'.");
+			
+				const dfdlAlignmentUnits = new vscode.CompletionItem('dfdl:alignmentUnits=');
+				dfdlAlignmentUnits.insertText = new vscode.SnippetString('dfdl:alignmentUnits="${1|bits,bytes|}"$0');
+				dfdlAlignmentUnits.documentation = new vscode.MarkdownString("Scales the alignment.\nCan only be used when alignment is bits or bytes.\nValid values are 'bits or 'bytes'.");
+			
+				const dfdlTerminator = new vscode.CompletionItem('dfdl:terminator=');
+				dfdlTerminator.insertText = new vscode.SnippetString("dfdl:terminator=\"$1\"$0");
+				dfdlTerminator.documentation = new vscode.MarkdownString("charater or bytes found in the input stream that designate termination of an element");
+	
+				const dfdlOutputNewLine = new vscode.CompletionItem('dfdl:outputNewLine=');
+				dfdlOutputNewLine.insertText = new vscode.SnippetString("dfdl:outputNewLine=\"${1|%CR,%LF,%CR%LF,%NEL,%LS|}\"$0");
+				dfdlOutputNewLine.documentation = new vscode.MarkdownString("Specifies the character or characters that are used to replace the %NL; character class entity during unparse");
+	
+				//const wholeLine = document.lineAt(position).text.substr(0, position.character);
+				if (wholeLine.includes('<xs:element name="') || (wholeLine.includes('<xs:element ref="'))) {
+					return [
+					  xmlType,
+						minOccurs,
+						maxOccurs,
+						dfdlOccursCount,
+						dfdlOccursCountKind,
+						dfdlLength,
+						dfdlLengthKind,
+						dfdlLengthUnits,
+						dfdlLengthPattern,
+						xmlEncoding,
+						dfdlInputValueCalc,
+						dfdlOutputValueCalc,
+						dfdlAlignment,
+						dfdlAlignmentUnits,
+						dfdlTerminator,
+						dfdlOutputNewLine,
+					];
+				}
+			}
+		},
+		' ' // triggered whenever  ' ' is typed
+	);
+
+	const elementNewLineTriggerProvider = vscode.languages.registerCompletionItemProvider(
+		'dfdl.xsd',
+		{
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				if(checkElementOpen(document, position)) {
+					console.log('checkElementOpen() returned true');
+					var preVal;
+					if(lineCount(document, position) == 1) {
+						preVal = '\t';
+					}
+					else {
+						preVal = '';
+					}
+					const dfdlDefineFormat = new vscode.CompletionItem("dfdl:defineFormat");
+					dfdlDefineFormat.insertText = new vscode.SnippetString(preVal + '<dfdl:defineFormat name="$1" >\n\t$2\n</dfdl:defineFormat>\n$0');
+					dfdlDefineFormat.documentation = new vscode.MarkdownString("dfdl format name and configuration");
+				
+					const dfdlDefineEscape = new vscode.CompletionItem('dfdl:defineEscapeScheme');
+					dfdlDefineEscape.insertText = new vscode.SnippetString(preVal + '<dfdl:defineEscapeScheme name=$1 >\n\t$0,/dfdl:defineEscapeScheme>\n');
+					dfdlDefineEscape.documentation = new vscode.MarkdownString("dfdl escape character definition");
+				
+					const xmlType = new vscode.CompletionItem('type=');
+					xmlType.insertText = new vscode.SnippetString(preVal + 'type=\"${1|xs:string,xs:decimal,xs:float,xs:double,xs:integer,xs:nonNegativeInteger,xs:int,xs:unsignedint,xs:short,xs:unsignedShort,xs:long,xs:unsignedLong,xs:byte,xs:unsignedByte,xs:hexBinary,xs:boolean|}\"$0');
+					xmlType.documentation = new vscode.MarkdownString("attribute to specify a simple type element type")
+				
+					const minOccurs = new vscode.CompletionItem('minOccurs=');
+					minOccurs.insertText = new vscode.SnippetString(preVal + 'minOccurs="${1|0,1|}\"$0');
+					minOccurs.documentation = new vscode.MarkdownString("mininum number of times element will occur");
+				
+					const maxOccurs = new vscode.CompletionItem('maxOccurs=');
+					maxOccurs.insertText = new vscode.SnippetString(preVal + 'maxOccurs="${1|0,1,unbounded|}\"$0');
+					maxOccurs.documentation = new vscode.MarkdownString("maximum number of times element will occur");
+				
+					const dfdlOccursCount = new vscode.CompletionItem("dfdl:occursCount=");
+					dfdlOccursCount.insertText = new vscode.SnippetString(preVal + "dfdl:occursCount=\"$1\"$0");
+					dfdlOccursCount.documentation = new vscode.MarkdownString("dfdl:occursCount property takes an expression which commonly looks in the Infoset via an expression, to obtain the count from another element.");
+				
+					const dfdlOccursCountKind = new vscode.CompletionItem('dfdl:occursCountKind=');
+					dfdlOccursCountKind.insertText = new vscode.SnippetString(preVal + "dfdl:occursCountKind=\"${1|expression,fixed,implicit,parsed,stopValue|}\"$0");
+					dfdlOccursCountKind.documentation = new vscode.MarkdownString("occursCountKind can be expression, fixed, implicit, parsed, stopValue");
+				
+					const dfdlLength = new vscode.CompletionItem('dfdl:length=');
+					dfdlLength.insertText = new vscode.SnippetString(preVal + "dfdl:length=\"$1\"$0");
+					dfdlLength.documentation = new vscode.MarkdownString("length can be an expression that resolves to an unsigned integer, or a literal unsigned integer");
+			
+					const dfdlLengthKind = new vscode.CompletionItem('dfdl:lengthKind=');
+					dfdlLengthKind.insertText = new vscode.SnippetString(preVal + "dfdl:lengthKind=\"${1|delimited,fixed,explicit,implicit,prefixed,pattern,endOfParent|}\"$0");
+					dfdlLengthKind.documentation = new vscode.MarkdownString("lengthKind can be delimited, fixed, explicit, implicit, prefixed,pattern, or endOfParent");
+				
+					const dfdlLengthUnits = new vscode.CompletionItem("dfdl:lengthUnits=");
+					dfdlLengthUnits.insertText = new vscode.SnippetString(preVal + "dfdl:lengthUnits=\"${1|bits,bytes,characters|}\"$0");
+					dfdlLengthUnits.documentation = new vscode.MarkdownString("lengthUnits can be specified as bits, bytes, or characters");
+				
+					const dfdlLengthPattern = new vscode.CompletionItem('dfdl:lengthPattern=');
+					dfdlLengthPattern.insertText = new vscode.SnippetString(preVal + "dfdl:lengthPattern=\"$1\"$0");
+					dfdlLengthPattern.documentation = new vscode.MarkdownString("lengthPattern takes a regular expression which is used to scan the data stream for matching data");
+				
+					const xmlEncoding = new vscode.CompletionItem('dfdl:encoding=');
+					xmlEncoding.insertText = new vscode.SnippetString(preVal + "dfdl:encoding=\"${1|US-ASCII,ASCII,UTF-8,UTF-16,UTF-16BE,UTF-16LE,ISO-8859-1|}\"$0");
+					xmlEncoding.documentation = new vscode.MarkdownString("encoding can be US-ASCII, ASCII, UTF-8, UTF-16, UTF-16BE UTF-16LE, or ISO-8859-1"); 
+				
+					const dfdlInputValueCalc = new vscode.CompletionItem("dfdl:inputValueCalc=");
+					dfdlInputValueCalc.insertText = new vscode.SnippetString(preVal + "dfdl:inputValueCalc=\"{$1}\"$0");
+					dfdlInputValueCalc.documentation = new vscode.MarkdownString("An expression that calculates the value of the element when parsing");
+				
+					const dfdlOutputValueCalc = new vscode.CompletionItem("dfdl:outputValueCalc=");
+					dfdlOutputValueCalc.insertText = new vscode.SnippetString(preVal + "dfdl:outputValueCalc=\"{$1}\"$0");
+					dfdlOutputValueCalc.documentation = new vscode.MarkdownString("An expression that calculates the value of the current element when unparsing");
+
+					const dfdlAlignment = new vscode.CompletionItem("dfdl:alignment=");
+					dfdlAlignment.insertText = new vscode.SnippetString(preVal + 'dfdl:alignment=\"${1|1,2,implicit|}\"$0');
+					dfdlAlignment.documentation = new vscode.MarkdownString("Alignment required for the beginning of the item.\nCan be non-negative integer or 'implicit'.");
+				
+					const dfdlAlignmentUnits = new vscode.CompletionItem('dfdl:alignmentUnits=');
+					dfdlAlignmentUnits.insertText = new vscode.SnippetString(preVal + 'dfdl:alignmentUnits="${1|bits,bytes|}"$0');
+					dfdlAlignmentUnits.documentation = new vscode.MarkdownString("Scales the alignment.\nCan only be used when alignment is bits or bytes.\nValid values are 'bits or 'bytes'.");
+				
+					const dfdlTerminator = new vscode.CompletionItem('dfdl:terminator=');
+					dfdlTerminator.insertText = new vscode.SnippetString(preVal + "dfdl:terminator=\"$1\"$0");
+					dfdlTerminator.documentation = new vscode.MarkdownString("charater or bytes found in the input stream that designate termination of an element");
+		
+					const dfdlOutputNewLine = new vscode.CompletionItem('dfdl:outputNewLine=');
+					dfdlOutputNewLine.insertText = new vscode.SnippetString(preVal + "dfdl:outputNewLine=\"${1|%CR,%LF,%CR%LF,%NEL,%LS|}\"$0");
+					dfdlOutputNewLine.documentation = new vscode.MarkdownString("Specifies the character or characters that are used to replace the %NL; character class entity during unparse");
+		
+					const wholeLine = document.lineAt(position).text.substr(0, position.character);
+					if (!wholeLine.includes('<xs:element name="') || (!wholeLine.includes('<xs:element ref="'))) {
+						return [
+							xmlType,
+							minOccurs,
+							maxOccurs,
+							dfdlOccursCount,
+							dfdlOccursCountKind,
+							dfdlLength,
+							dfdlLengthKind,
+							dfdlLengthUnits,
+							dfdlLengthPattern,
+							xmlEncoding,
+							dfdlInputValueCalc,
+							dfdlOutputValueCalc,
+							dfdlAlignment,
+							dfdlAlignmentUnits,
+							dfdlTerminator,
+							dfdlOutputNewLine,
+						];
+					}
+				}
+				return undefined;
+			}
+		},
+		'\n' // triggered whenever a newline is typed
+	);
+
+	function lineCount(document: vscode.TextDocument, position: vscode.Position) {
+		var lineNum = position.line;
+		var lineCount = 0;
+		while(lineNum != 0) {
+			-- lineNum;
+			++ lineCount;
+			const wholeLine = document.lineAt(lineNum).text.substr(0,document.lineAt(lineNum).range.end.character);
+			if(wholeLine.includes('<xs:element') && !wholeLine.includes("</xs:element") && !wholeLine.includes('/>')) {
+				return lineCount;
+			}
+		}
+		return lineCount;
+	}
+
+	function checkElementOpen(document: vscode.TextDocument, position: vscode.Position) {
+		var lineNum = position.line;
+		while(lineNum != 0) {
+			-- lineNum;
+			const wholeLine = document.lineAt(lineNum).text.substr(0,document.lineAt(lineNum).range.end.character);
+			console.log(wholeLine);
+			if(wholeLine.includes('<xs:element') && ((wholeLine.includes("</xs:element")) || (wholeLine.includes('/>')))) {
+				return false;
+			}
+			if(wholeLine.includes('<xs:element') && (!wholeLine.includes("</xs:element")) && (!wholeLine.includes('/>'))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	const closeGtProvider = vscode.languages.registerCompletionItemProvider(
+		'dfdl.xsd',
+		{
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				var backpos = position.with(position.line, position.character - 1);
+				const wholeLine = document.lineAt(position).text.substr(0, position.character);
+				if (wholeLine.endsWith('>') && (wholeLine.includes('xs:element') || checkElementOpen(document, position))) {
+					var backspace = new vscode.Selection(backpos, backpos);
+					var range = new vscode.Range(backpos,position);
+					vscode.window.activeTextEditor?.edit(editBuilder => {
+						editBuilder.replace(range, '');
+					})
+				if(wholeLine.includes('xs:element ref') || wholeLine.includes('xs:group ref')) {
+							vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(' />\n$0'), backpos);
+					}
+					else {
+						if(wholeLine.includes('xs:element')) {
+							vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString('>\n\t$1\n</xs:element>$0'), position);
+						}
+						if(wholeLine.includes('xs:group')) {
+							vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString('>\n\t$1\n</xs:group>$0'), position);
+						}
+					}
+// 					const elementEmptyTag = new vscode.CompletionItem('/>')
+// 					elementEmptyTag.insertText = new vscode.SnippetString('/>\n$0')
+// //					elementEmptyTag.insertText = new vscode.SnippetString('</xs:element>$0')
+// 					const elementEndTag = new vscode.CompletionItem('</xs:element>');
+// 					elementEndTag.insertText = new vscode.SnippetString('>\n\t$0\n</xs:element>');
+		
+// 					return [
+// 						elementEmptyTag,
+// 						elementEndTag,
+// 					];
+				  //const elementEmptyTag = new vscode.SnippetString('/>\n$0)')
+					//const elementEndTag = new vscode.SnippetString('\n\t$0\n</xs:element>');
+					//vscode.window.activeTextEditor?.insertSnippet(endElement);
+					//return undefined;
+			  }
+				return undefined;
+			}
+		},
+		'>' // triggered whenever a '>' is typed
+	);
+	
+	const endSingleQuoteProvider = vscode.languages.registerCompletionItemProvider (
+		'dfdl.xsd',
+		{
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				const posPlusOne = new vscode.Position(position.line, position.character + 1);
+				const wholeLine = document.lineAt(position).text.substr(0, position.character);
+				console.log(wholeLine);
+				if((wholeLine.charAt(position.character + 1) != "'") && (wholeLine.includes('"{'))) {
+					vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString("$1\'$0"), position);
+				}
+				return undefined;
+			}
+		},
+		"'"
+	);
+
+	const closeSlashProvider = vscode.languages.registerCompletionItemProvider(
+		'dfdl.xsd',
+		{
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				var backpos = position.with(position.line, position.character - 1);
+				const wholeLine = document.lineAt(position).text.substr(0, position.character);
+				if((wholeLine.includes('"{')) && (!wholeLine.includes('}"'))) {
+					return undefined;
+				}
+				if (wholeLine.endsWith('/') && ((wholeLine.includes('xs:element') || (wholeLine.includes('xs:group')) || checkElementOpen(document, position)))) {
+					var backspace = new vscode.Selection(backpos, backpos);
+					var range = new vscode.Range(backpos,position);
+					vscode.window.activeTextEditor?.edit(editBuilder => {
+						editBuilder.replace(range, '');
+					})
+					if(wholeLine.includes('xs:element ref') || wholeLine.includes('xs:group ref')) {
+						vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(' />$0'), backpos);
+					}
+					else {
+							vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(' />\n$0'), backpos);
+					}
+				}
+				return undefined;
+			}
+		},
+		'/' // triggered whenever a '/' is typed
+	);
+		context.subscriptions.push(provider1, elementSpaceTriggerProvider, elementNewLineTriggerProvider, closeGtProvider, closeSlashProvider);
+}
