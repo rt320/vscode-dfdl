@@ -18,12 +18,12 @@ Add the schema block
 Completing a DFDL Format Block.
 ![](DfdlFormat.gif)
 
-Creating self define dfdl:complextypes and dfdl:simpleTypes.
-![](SelfDefinedTypes.gif)
-
 The '>' or '/' characters are used to close and XML tag.
 Typing the initial characters and one or more unique characters will further limit the results.
 ![](TabToExitQuotesAndEndTag.gif)
+
+Creating self define dfdl:complextypes and dfdl:simpleTypes.
+![](SelfDefinedTypes.gif)
 
 The tab key can be used to complete an auto-complete item within an XML tag.
 After auto complete is triggered, typing the initial character or characters will limit the suggestion results.
