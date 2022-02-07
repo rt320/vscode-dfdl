@@ -12,20 +12,26 @@ Auto suggest is triggered using control space or typing the beginning characters
 Typing one or more unique characters will further limit the results.
 ![](CharacterTrigger.gif)
 
-Typing characters outside of an XML tag will also trigger auto suggestion.
-![](CharacterTrigger2.gif)
+Completing a DFDL Format Block.
+![](DfdlFormat.gif)
 
-The tab key is used to complete an auto-complete item within an XML tag.
-The '>' or '/' characters are used to close and XML tag
-![](ExitAndEndTag.gif)
+Creating self define dfdl:complextypes and dfdl:simpleTypes.
+![](SelfDefinedTypes.gif)
 
-After auto complete is triggered, typing the initial character or characters will limit the suggestion results.
+The '>' or '/' characters are used to close and XML tag.
 Typing the initial characters and one or more unique characters will further limit the results.
-![](UniqueCharacters.gif)
+![](TabToExitQuotesAndEndTag.gif)
 
+The tab key can be used to complete an auto-complete item within an XML tag.
+After auto complete is triggered, typing the initial character or characters will limit the suggestion results.
 Inside an XML tag a space or carriage return will trigger a list of context sensitive attribute suggestions.
 ![](AttributeSuggestions.gif)
 
+Using self defined types.
+![](UsingSelfDefinedTypes.gif)
+
+Using xs:choice and dfdl:Discriminator.
+![](ChoiceDiscriminator.gif)
 
 ## Requirements
 
@@ -61,7 +67,7 @@ The package vscode-dfdl-0.0.1.vsix should be in the project director.
 ## Install the Extension
 
 Close VS Code if it is open. From an OS Command line, run:
-  code 'path to vsix file'\vscode-dfdl-0.0.1.vsix
+  code --install-extension "path to vsix file"\vscode-dfdl-0.0.1.vsix
 
 Re-open VS Code, open the pallet (ctrl+shift+P)
   select or type 'Change Language Mode'
