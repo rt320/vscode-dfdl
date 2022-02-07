@@ -12,6 +12,9 @@ Auto suggest is triggered using control space or typing the beginning characters
 Typing one or more unique characters will further limit the results.
 ![](CharacterTrigger.gif)
 
+Add the schema block
+![](SchemaBlok.gif)
+
 Completing a DFDL Format Block.
 ![](DfdlFormat.gif)
 
