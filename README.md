@@ -13,7 +13,7 @@ Typing one or more unique characters will further limit the results.
 ![](CharacterTrigger.gif)
 
 Add the schema block
-![](SchemaBlok.gif)
+![](SchemaBlock.gif)
 
 Completing a DFDL Format Block.
 ![](DfdlFormat.gif)
