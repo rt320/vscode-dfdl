@@ -211,7 +211,7 @@ export function activate(context: vscode.ExtensionContext) {
 						dfdlInputValueCalc.documentation = new vscode.MarkdownString("An expression that calculates the value of the element when parsing");
 					
 						const dfdlOutputValueCalc = new vscode.CompletionItem("dfdl:outputValueCalc=");
-						dfdlOutputValueCalc.insertText = new vscode.SnippetString(preVal + "dfdl:outputValueCalc=\"{$0}\"");
+						dfdlOutputValueCalc.insertText = new vscode.SnippetString(preVal + "dfdl:outputValueCalc=\"{$1}\"$0");
 						dfdlOutputValueCalc.documentation = new vscode.MarkdownString("An expression that calculates the value of the current element when unparsing");
 
 						const dfdlAlignment = new vscode.CompletionItem("dfdl:alignment=");
@@ -237,8 +237,8 @@ export function activate(context: vscode.ExtensionContext) {
 						const dfdlRepresentation = new vscode.CompletionItem('dfdl:representation');
 						dfdlRepresentation.insertText = new vscode.SnippetString('dfdl:representation="${1|binary,text|}"$0');
 		
-						console.log('In elementAttributeProvider just before if logic to return completion list');
-						console.log('wholeLine is: ' + wholeLine);
+						// console.log('In elementAttributeProvider just before if logic to return completion list');
+						// console.log('wholeLine is: ' + wholeLine);
 						if (checkLastItemOpen(document, position) && ((wholeLine.includes('<xs:element name="') || wholeLine.includes('<xs:element ref="') || checkElementOpen(document, position)))) {
 							return [
 								dfdlDefineFormat,
@@ -384,11 +384,11 @@ function checkLastItemOpen(document: vscode.TextDocument, position: vscode.Posit
 	if((previousLine.includes('</') || previousLine.includes('/>')) ||  
 	((wholeLine.includes('element') || wholeLine.includes('sequence') || wholeLine.includes('group')) &&
 	(wholeLine.includes('</') || wholeLine.includes('/>')))) {
-		console.log('checkLastOpenItem returns false');
+		// console.log('checkLastOpenItem returns false');
 		return false;
 	}
+	// console.log('checkLastOpenItem returns true');}
 	return true;
-	console.log('checkLastOpenItem returns true');}
 
 function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 		var lineNum = position.line;
@@ -410,7 +410,7 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 		  const wholeLine = document.lineAt(lineNum).text.substring(0,document.lineAt(lineNum).range.end.character);
 			if(wholeLine.includes('element') && !wholeLine.includes('/')) {
 				if(checkElementOpen(document, position)) {
-					console.log("nearestOpen() returns element. wholeLine is: " + wholeLine);
+					// console.log("nearestOpen() returns element. wholeLine is: " + wholeLine);
 					return 'element';
 				}
 			}
@@ -441,7 +441,10 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 		var lineNum = position.line;
 		while(lineNum !== -1) {
 			const wholeLine = document.lineAt(lineNum).text.substr(0,document.lineAt(lineNum).range.end.character);
-			if(wholeLine.includes('<xs:element') && ((wholeLine.includes('>') || (wholeLine.includes('</xs:element')) || (wholeLine.includes('/>')))) || (wholeLine.includes('</xs:element>'))) {
+			if(wholeLine.includes('<xs:element') && ((wholeLine.includes('>')) || (wholeLine.includes('</xs:element')) || (wholeLine.includes('/>')))){
+				return false;
+			}
+			if(wholeLine.includes('</xs:element>')) {
 				return false;
 			}
 			if(wholeLine.includes('<xs:element') && (!wholeLine.includes("</xs:element")) && (!wholeLine.includes('/>')
@@ -512,6 +515,9 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 			if(wholeLine.includes('"{') && (!wholeLine.includes('}"'))) {
 				return true;
 			}
+			if(wholeLine.includes('}"')) {
+				return false;
+			}
 			--lineNum;
 		}
 		return false;
@@ -524,11 +530,14 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 				var backpos = position.with(position.line, position.character - 1);
 				const nearestOpenItem = nearestOpen(document, position);
 				const wholeLine = document.lineAt(position).text.substr(0, position.character);
+				// console.log('In closeElementGtProvider: if open element or group or sequence');
+				// console.log('in closeElementGtProvider - nearest open item: ' + nearestOpenItem);
+				// console.log('in closeElementGtProvider - wholeLine: ' + wholeLine);
 				if (wholeLine.endsWith('>') && (wholeLine.includes('xs:element') || nearestOpenItem.includes('element') 
 				  || wholeLine.includes('xs:group') || nearestOpenItem.includes('group') 
 					|| wholeLine.includes('xs:sequence') || nearestOpenItem.includes('sequence')
 					|| wholeLine.includes('xs:simpleType') || nearestOpenItem.includes('simpleType'))) {
-					console.log('In closeElementGTProvider: if open element or group or sequence');
+					// console.log('In closeElementGTProvider: if open element or group or sequence or simpleType');
 					var backspace = new vscode.Selection(backpos, backpos);
 					var range = new vscode.Range(backpos,position);
 					vscode.window.activeTextEditor?.edit(editBuilder => {
@@ -563,10 +572,13 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 				var backpos = position.with(position.line, position.character - 1);
 				const wholeLine = document.lineAt(position).text.substr(0, position.character);
 				const nearestOpenItem = nearestOpen(document, position);
+				// console.log('In closeElementSlashProvider: if open element or group or sequence');
+				// console.log('in closeElementSlashProvider - nearest open item: ' + nearestOpenItem);
+				// console.log('in closeElementSlashProvider - wholeLine: ' + wholeLine);
 				if(checkBraceOpen(document, position)) {
 					return undefined;
 				}
-				console.log('In closeElementGTProvider: if open element or group or sequence');
+				// console.log('in closeElementSlashProvider - passed all checks - if is next');
 				if (wholeLine.endsWith('/') && (wholeLine.includes('xs:element') || nearestOpenItem.includes('element') 
 				|| wholeLine.includes('xs:group') || nearestOpenItem.includes('group') 
 				|| wholeLine.includes('xs:sequence') || nearestOpenItem.includes('sequence'))) {
