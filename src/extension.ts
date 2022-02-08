@@ -10,6 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const wholeLine = document.lineAt(position).text.substr(0, position.character);
 			if(checkBraceOpen(document, position)) {
+				console.log("in elementCompletionProvider - brace is showing open");
 				return undefined;					
 			}
 		// a simple completion item which inserts `Hello World!`
@@ -513,11 +514,11 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 				return true;
 			}
 			if(wholeLine.includes('"{') && (!wholeLine.includes('}"')) && 
-			(!wholeLine.includes('}"/')) && (!wholeLine.includes('<'))) {
+			(!wholeLine.includes('}"/')) && (!wholeLine.includes('>'))) {
 				return true;
 			}
 			if((wholeLine.includes('}"')) && 
-			(!wholeLine.includes('}"/')) && (!wholeLine.includes('<'))) {
+			(!wholeLine.includes('}"/')) && (!wholeLine.includes('>'))) {
 				return true;
 			}
 			if(wholeLine.includes('}"') && (wholeLine.includes('}"/') || wholeLine.includes('>') || wholeLine.includes('/>'))) {
