@@ -38,6 +38,9 @@ Using self defined types.
 Using xs:choice and dfdl:Discriminator.
 ![ChoiceDiscriminator](https://user-images.githubusercontent.com/98881959/152995769-b6afda2b-dd77-4f7a-ad18-b3e1f28087f6.gif)
 
+Using hidden references and dfdl:inputValueCalc
+![HiddenRefGroupAndInputValueCalc](https://user-images.githubusercontent.com/98881959/153010643-9d1c8361-b55d-45e4-a7a4-907ec876de76.gif)
+
 ## Requirements
 
 Node.js (https://nodejs.org/en/download/)
