@@ -364,7 +364,6 @@ export function activate(context: vscode.ExtensionContext) {
 								xsRestriction,
 							];
 						}
-
 					}
 				}
 				return undefined;
@@ -387,7 +386,8 @@ function checkLastItemOpen(document: vscode.TextDocument, position: vscode.Posit
 		// console.log('checkLastOpenItem returns false');
 		return false;
 	}
-	// console.log('checkLastOpenItem returns true');}
+	// console.log('checkLastOpenItem returns true');
+}
 	return true;
 
 function lineCount(document: vscode.TextDocument, position: vscode.Position) {
@@ -642,7 +642,7 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 			++ lineNum;
 		}
 		return additionalTypes;
-}
+  }
 
 	context.subscriptions.push(elementCompletionProvider, attributeCompletionProvider, closeElementGtProvider, closeElementSlashProvider, endSingleBraceProvider);
 }
