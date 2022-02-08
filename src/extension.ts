@@ -387,8 +387,8 @@ function checkLastItemOpen(document: vscode.TextDocument, position: vscode.Posit
 		return false;
 	}
 	// console.log('checkLastOpenItem returns true');
-}
 	return true;
+}
 
 function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 		var lineNum = position.line;
