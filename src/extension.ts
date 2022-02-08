@@ -408,13 +408,13 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 		var lineNum = position.line;
 		while(lineNum !== -1) {
 		  const wholeLine = document.lineAt(lineNum).text.substring(0,document.lineAt(lineNum).range.end.character);
-			if(wholeLine.includes('element') && !wholeLine.includes('/')) {
+			if(wholeLine.includes('element') && !wholeLine.includes('/>')) {
 				if(checkElementOpen(document, position)) {
 					// console.log("nearestOpen() returns element. wholeLine is: " + wholeLine);
 					return 'element';
 				}
 			}
-			else if(wholeLine.includes('sequence') && !wholeLine.includes('/')) {
+			else if(wholeLine.includes('sequence') && !wholeLine.includes('/>')) {
 				if(checkSequenceOpen(document, position)) {
 					return 'sequence';
 				}
@@ -424,7 +424,7 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 					return 'group';
 				}
 			}
-			else if(wholeLine.includes('simpleType') && !wholeLine.includes('/')) {
+			else if(wholeLine.includes('simpleType') && !wholeLine.includes('/>')) {
 				if(checkSimpleTypeOpen(document, position)) {
 					return 'simpleType';
 				}
@@ -509,13 +509,18 @@ function lineCount(document: vscode.TextDocument, position: vscode.Position) {
 		while(lineNum !== 0) {
 			const wholeLine = document.lineAt(lineNum).text.substring(0, document.lineAt(lineNum).range.end.character);
 			endPos = wholeLine.lastIndexOf('}');
-			if(wholeLine.includes('"{') && wholeLine.includes('}"') && wholeLine.includes('..')) {
+			if(wholeLine.includes('"{') && wholeLine.includes('}"') && wholeLine.includes('..') && !wholeLine.includes('}"/')  && !wholeLine.includes('>')) {
 				return true;
 			}
-			if(wholeLine.includes('"{') && (!wholeLine.includes('}"'))) {
+			if(wholeLine.includes('"{') && (!wholeLine.includes('}"')) && 
+			(!wholeLine.includes('}"/')) && (!wholeLine.includes('<'))) {
 				return true;
 			}
-			if(wholeLine.includes('}"')) {
+			if((wholeLine.includes('}"')) && 
+			(!wholeLine.includes('}"/')) && (!wholeLine.includes('<'))) {
+				return true;
+			}
+			if(wholeLine.includes('}"') && (wholeLine.includes('}"/') || wholeLine.includes('>') || wholeLine.includes('/>'))) {
 				return false;
 			}
 			--lineNum;
