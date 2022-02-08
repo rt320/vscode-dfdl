@@ -41,6 +41,21 @@ Using xs:choice and dfdl:Discriminator.
 Using hidden references and dfdl:inputValueCalc
 ![HiddenRefGroupAndInputValueCalc](https://user-images.githubusercontent.com/98881959/153010643-9d1c8361-b55d-45e4-a7a4-907ec876de76.gif)
 
+Using dfdl:OutputValueCalc
+![OutputValueCalc](https://user-images.githubusercontent.com/98881959/153051326-2b9d03ce-3e3a-420a-abba-408b25a2c3d2.gif)
+
+More examples of using user defined types
+![MoreUsingUserDefinedTypes](https://user-images.githubusercontent.com/98881959/153051453-e76250e2-96f6-4f07-8e9a-0a77f9ece5fe.gif)
+
+Using the dfdl:Length attribute with XPath values
+![DfdlLengthWithXPaths](https://user-images.githubusercontent.com/98881959/153051544-78372145-98aa-4b56-84f4-8b3a3bca4d9f.gif)
+
+Using dfdl:assert blocks
+![AssertBlock](https://user-images.githubusercontent.com/98881959/153051732-fb948f86-3485-4606-9e92-8325f1d5052d.gif)
+
+Miscellaneous examples
+![MoreExamples](https://user-images.githubusercontent.com/98881959/153051821-abc47704-878f-4c01-8a29-c0d3911940d0.gif)
+
 ## Requirements
 
 Node.js (https://nodejs.org/en/download/)
