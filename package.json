@@ -1,13 +1,24 @@
 {
   "name": "vscode-dfdl",
   "displayName": "vscode-dfdl",
-  "description": "An extension that enables auto completion of XML for DFDL schemas",
+  "description": "An extension that enables auto completion of xml/dfdl for Data Format Description language schemas",
   "version": "0.0.1",
+  "publisher": "nteligen",
   "engines": {
     "vscode": "^1.62.0"
   },
-  "activationEvents": [
-    "*"
+  "contributes": {
+    "languages": [
+      {
+        "id": "dfdl",
+        "extensions": [".dfdl.xsd"],
+        "aliases": ["dfdl", "dfdl.xsd", "DFDL"]
+
+      }
+    ]
+},
+    "activationEvents": [
+    "onLanguage:dfdl"
   ],
   "main": "./out/extension.js",
   "scripts": {
@@ -30,5 +41,9 @@
     "glob": "^7.1.7",
     "mocha": "^9.1.1",
     "typescript": "^4.5.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rt320/vscode-dfdl"
   }
 }
