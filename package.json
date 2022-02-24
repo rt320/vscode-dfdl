@@ -7,17 +7,23 @@
   "engines": {
     "vscode": "^1.62.0"
   },
+  "categories": [
+    "Programming Languages"
+  ],
   "contributes": {
-    "languages": [
-      {
+      "languages": [{
         "id": "dfdl",
-        "extensions": [".dfdl.xsd"],
-        "aliases": ["dfdl", "dfdl.xsd", "DFDL"]
-
-      }
-    ]
-},
-    "activationEvents": [
+        "aliases": ["dfdl", "dfdl"],
+        "extensions": ["dfdl.xsd"],
+        "configuration": "./dfdl.language-configuration.json"
+      }],
+    "grammars": [{
+        "language": "dfdl",
+        "scopeName": "source.dfdl.xsd",
+        "path": "./syntaxes/dfdl.tmLanguage.json"
+      }]
+  },
+  "activationEvents": [
     "onLanguage:dfdl"
   ],
   "main": "./out/extension.js",
