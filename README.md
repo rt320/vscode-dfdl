@@ -100,6 +100,11 @@ Re-open VS Code, open the pallet (ctrl+shift+P)
 
 None
 
+## Semantic Highlighting
+
+The base functionality for XPath Semantic Highlighting was taken from the DeltaXML Extension.
+https://github.com/DeltaXML/vscode-xslt-tokenizer
+
 ## Known Issues
 
 The extension uses a clunky method to auto complete curly braces within quotes.  Hopefully this can be
