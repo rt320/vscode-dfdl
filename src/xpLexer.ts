@@ -1210,7 +1210,7 @@ export enum ErrorType {
     PopNesting,
     XSLTKeyUnresolved,
     XMLRootMissing,
-    DTD,
+    DTD
 }
 
 export interface BaseToken {

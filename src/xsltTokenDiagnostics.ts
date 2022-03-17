@@ -398,7 +398,8 @@ export class XsltTokenDiagnostics {
             xsltPrefixesToURIs.set('fn', XSLTnamespaces.XPath);
             xsltPrefixesToURIs.set('xsl', XSLTnamespaces.XSLT);
             xsltPrefixesToURIs.set('ixsl', XSLTnamespaces.IXSL);
-            inheritedPrefixes = inheritedPrefixes.concat(['array', 'map', 'math', 'xs', 'fn', 'xsl', 'ixsl']);
+            xsltPrefixesToURIs.set('dfdl', XSLTnamespaces.dfdl);
+            inheritedPrefixes = inheritedPrefixes.concat(['array', 'map', 'math', 'xs', 'fn', 'xsl', 'ixsl', 'dfdl']);
         }
 
         allTokens.forEach((token, index) => {
@@ -1973,6 +1974,9 @@ export class XsltTokenDiagnostics {
                     case XSLTnamespaces.ExsltRegex:
                     case XSLTnamespaces.ExsltSets:
                     case XSLTnamespaces.ExsltStrings:
+                        isValid = true;
+                        break;
+                    case XSLTnamespaces.dfdl:
                         isValid = true;
                         break;
                 }

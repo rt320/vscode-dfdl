@@ -1,9 +1,165 @@
 import { Console } from 'console';
 import { cursorTo, moveCursor } from 'readline';
 import * as vscode from 'vscode';
+import { XPathLexer, ExitCondition, LexPosition, Token, BaseToken } from './xpLexer';
+import { XslLexer, DocumentTypes, GlobalInstructionData, GlobalInstructionType } from './xslLexer';
+import { XsltTokenDiagnostics } from './xsltTokenDiagnostics';
+import { XPathConfiguration } from './languageConfigurations';
+import { DocumentChangeHandler } from './documentChangeHandler';
+
+const tokenModifiers = new Map<string, number>();
+
+const legend = (function () {
+	const tokenTypesLegend = XslLexer.getTextmateTypeLegend();
+
+	const tokenModifiersLegend = [
+		'declaration', 'documentation', 'member', 'static', 'abstract', 'deprecated',
+		'modification', 'async'
+	];
+	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
+
+	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
+})();
+
+export class XPathSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+	private xpLexer = new XPathLexer();
+	private collection: vscode.DiagnosticCollection;
+	public constructor(collection: vscode.DiagnosticCollection) {
+		this.collection = collection;
+	}
+
+	private static globalInstructionData: GlobalInstructionData[] = [];
+
+	public static getGlobalInstructionData() {
+		return XPathSemanticTokensProvider.globalInstructionData;
+	}
+
+	public static setVariableNames = (names: string[]) => {
+		const data: GlobalInstructionData[] = [];
+
+		names.forEach((name) => {
+			const token: BaseToken = {
+				line: 1,
+				startCharacter: 0,
+				length: 1,
+				value: name,
+				tokenType: 0
+			};
+			const variableInstruction: GlobalInstructionData = {
+				type: GlobalInstructionType.Variable,
+				name: name,
+				token: token,
+				idNumber: 0
+			};
+			data.push(variableInstruction);
+		});
+		XPathSemanticTokensProvider.globalInstructionData = data;
+	};
+
+	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+		this.xpLexer.documentTokens = [];
+		let tokens: Token[] = [];
+
+		const valueCalcPositions = this.findAllXPath(document.getText());
+		console.log(valueCalcPositions.length);
+
+		for (let i = 0; i < valueCalcPositions.length; i++)
+		{
+			const line = valueCalcPositions[i][0];
+			const startCharacter = valueCalcPositions[i][1];
+			const documentOffset = valueCalcPositions[i][2];
+
+			const valueCalcPosition: LexPosition = { line: line, startCharacter: startCharacter, documentOffset: documentOffset };
+			const tmpTokens = this.xpLexer.analyse(document.getText(), ExitCondition.CurlyBrace, valueCalcPosition);
+			tokens = tokens.concat(tmpTokens);
+		}
+
+		setTimeout(() => this.reportProblems(tokens, document), 0);
+		const builder = new vscode.SemanticTokensBuilder();
+		tokens.forEach((token) => {
+			builder.push(token.line, token.startCharacter, token.length, token.tokenType, 0);
+		});
+		return builder.build();
+	}
+
+	private findAllXPath(document: String): [number, number, number][]
+	{
+		let retVal: [number, number, number][] = [];
+		let charCount = 0;
+		const lines = document.split('\n');
+		const valueCalcRegex = /dfdl:(out|in)putValueCalc=("|')/;
+		const setVariableRegex = /dfdl:setVariable.*value=("|')/;
+
+		for (let i = 0; i < lines.length; i++)
+		{
+			const calcMatch = lines[i].match(valueCalcRegex);
+			const variableMatch = lines[i].match(setVariableRegex);
+
+			if (calcMatch)
+			{
+				const lineOffset = lines[i].search(calcMatch[0]) + calcMatch[0].length + 1;
+				retVal.push([i, (calcMatch.index || 0) + calcMatch[0].length + 1, charCount + lineOffset]);
+			}
+			else if (variableMatch)
+			{
+				const lineOffset = lines[i].search(variableMatch[0]) + variableMatch[0].length + 1;
+				retVal.push([i, (variableMatch.index || 0) + variableMatch[0].length + 1, charCount + lineOffset]);
+			}
+
+			charCount += lines[i].length + 1;
+		}
+
+		return retVal;
+	}
+
+	public static findAllVariables(document: String | undefined): string[]
+	{
+		if (document === undefined)
+		{
+			return [];
+		}
+
+		const lines = document.split('\n');
+		const variableRegex = /dfdl:setVariable.*ref=\"(.*?)\"/;
+		const variableNames: string[] = [];
+
+		for (let i = 0; i < lines.length; i++)
+		{
+			const variableMatch = lines[i].match(variableRegex);
+
+			if (variableMatch)
+			{
+				variableNames.push('$' + variableMatch[1]);
+			}
+		}
+
+		return variableNames;
+	}
+
+	private reportProblems(allTokens: Token[], document: vscode.TextDocument) {
+		let diagnostics = XsltTokenDiagnostics.calculateDiagnostics(XPathConfiguration.configuration, DocumentTypes.XPath, document, allTokens, DocumentChangeHandler.lastXMLDocumentGlobalData, XPathSemanticTokensProvider.globalInstructionData, []);
+		if (diagnostics.length > 0) {
+			this.collection.set(document.uri, diagnostics);
+		} else {
+			this.collection.clear();
+		};
+	}
+}
 
 export function activate(context: vscode.ExtensionContext) {
-		
+
+	const docChangeHandler = new DocumentChangeHandler();
+	let activeEditor = vscode.window.activeTextEditor;
+
+	if (activeEditor)
+	{
+		docChangeHandler.registerXMLEditor(activeEditor);
+	}
+
+	const xpathDiagnosticsCollection = vscode.languages.createDiagnosticCollection('dfdl');
+	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'dfdl' }, new XPathSemanticTokensProvider(xpathDiagnosticsCollection), legend));
+	context.subscriptions.push(vscode.commands.registerCommand('dfdl.setVariableNames', (...args) => XPathSemanticTokensProvider.setVariableNames(XPathSemanticTokensProvider.findAllVariables(activeEditor?.document.getText()))));
+
 	const elementCompletionProvider = vscode.languages.registerCompletionItemProvider('dfdl', {
 
 		provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {

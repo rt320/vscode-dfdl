@@ -16,7 +16,8 @@ export enum XSLTnamespaces {
 	XMLSchema,
 	XPath,
 	XSLT,
-	IXSL
+	IXSL,
+	dfdl
 }
 
 export class FunctionData {
@@ -433,6 +434,23 @@ export class FunctionData {
 		"untypedAtomic#1",
 		"dateTimeStamp#1"
 	];
+
+	public static readonly dfdl = [
+		"dfdl:contentLength#2",
+		"dfdl:valueLength#2",
+		"dfdl:testBit#2",
+		"dfdl:setBits#8",
+		"dfdl:occursIndex#0",
+		"dfdl:checkConstraints#1",
+		"dfdl:encodeDFDLEntities#1",
+		"dfdl:decodeDFDLEntities#1",
+		"dfdl:containsDFDLEntities#1",
+		"dfdl:timeZoneFromDateTime#1",
+		"dfdl:timeZoneFromDate#1",
+		"dfdl:timeZoneFromTime#1",
+		"dfdl:checkRangeInclusive#3",
+		"dfdl:checkRangeExclusive#3"
+	].concat(FunctionData.xpath);
 
 	private static unionSimpleTypes() {
 		const baseSimpleTypes = FunctionData.schema.map(t => 'xs:' + t.substring(0, t.length - 2));
