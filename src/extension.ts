@@ -58,23 +58,33 @@ export class XPathSemanticTokensProvider implements vscode.DocumentSemanticToken
 
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		this.xpLexer.documentTokens = [];
+		let variables: string[] = this.findAllVariables(document.getText());
 		let tokens: Token[] = [];
 
-		const valueCalcPositions = this.findAllXPath(document.getText());
-		console.log(valueCalcPositions.length);
+		const tokenPositions = this.findAllXPath(document.getText());
 
-		for (let i = 0; i < valueCalcPositions.length; i++)
+		for (let i = 0; i < tokenPositions.length; i++)
 		{
-			const line = valueCalcPositions[i][0];
-			const startCharacter = valueCalcPositions[i][1];
-			const documentOffset = valueCalcPositions[i][2];
+			const line = tokenPositions[i][0];
+			const startCharacter = tokenPositions[i][1];
+			const documentOffset = tokenPositions[i][2];
 
-			const valueCalcPosition: LexPosition = { line: line, startCharacter: startCharacter, documentOffset: documentOffset };
-			const tmpTokens = this.xpLexer.analyse(document.getText(), ExitCondition.CurlyBrace, valueCalcPosition);
+			const lexPositions: LexPosition = { line: line, startCharacter: startCharacter, documentOffset: documentOffset };
+			let tmpTokens = this.xpLexer.analyse(document.getText(), ExitCondition.CurlyBrace, lexPositions);
+			console.log(tmpTokens.length);
 			tokens = tokens.concat(tmpTokens);
+
+			// This was moved to inside the loop. If it isn't, the sections of XPath will be treated
+			//   as a single XPath section instead of multiples
+			setTimeout(() => this.reportProblems(tmpTokens, document, variables), 0);
+
+			// Reset the temporary variable. If this is not done, existing tokens will not be flushed
+			//   and will be re-added to the tokens list. This might not affect the operation, but it does
+			//   increase the memory required by the tokenizer, potentially running out of memory.
+			tmpTokens = [];
 		}
 
-		setTimeout(() => this.reportProblems(tokens, document), 0);
+		
 		const builder = new vscode.SemanticTokensBuilder();
 		tokens.forEach((token) => {
 			builder.push(token.line, token.startCharacter, token.length, token.tokenType, 0);
@@ -82,11 +92,21 @@ export class XPathSemanticTokensProvider implements vscode.DocumentSemanticToken
 		return builder.build();
 	}
 
+	// Identify all sections in the full document that should be treated as XPath
 	private findAllXPath(document: String): [number, number, number][]
 	{
-		let retVal: [number, number, number][] = [];
+		let tokensFound: [number, number, number][] = [];
 		let charCount = 0;
 		const lines = document.split('\n');
+
+		// Regex should match up to the character before we need to start detecting XPath
+		// In these cases, there is a left curly brace right after the regex match, so
+		//   we may need to adjust the exact points if there are schemas with spaces between
+	    //   the open quote and the left curly brace.
+		// Also note that the start location that we return for processing should NOT include the
+		//   left curly brace. The way that the tokenizer determines when to stop processing
+		//   is to find an extra closing character (curly brace, single quote, or double quote)
+		//   If it doesn't terminate, it will tokenize the remainder of the file.
 		const valueCalcRegex = /dfdl:(out|in)putValueCalc=("|')/;
 		const setVariableRegex = /dfdl:setVariable.*value=("|')/;
 
@@ -95,24 +115,29 @@ export class XPathSemanticTokensProvider implements vscode.DocumentSemanticToken
 			const calcMatch = lines[i].match(valueCalcRegex);
 			const variableMatch = lines[i].match(setVariableRegex);
 
+			// The items in the tuple are used to determine the start point for the tokenizer. They are
+			//   the line number, position offset in the line, and document offset.
+			// The +1 on the position offset accounts for the opening curly brace.
 			if (calcMatch)
 			{
 				const lineOffset = lines[i].search(calcMatch[0]) + calcMatch[0].length + 1;
-				retVal.push([i, (calcMatch.index || 0) + calcMatch[0].length + 1, charCount + lineOffset]);
+				tokensFound.push([i, (calcMatch.index || 0) + calcMatch[0].length + 1, charCount + lineOffset]);
 			}
 			else if (variableMatch)
 			{
 				const lineOffset = lines[i].search(variableMatch[0]) + variableMatch[0].length + 1;
-				retVal.push([i, (variableMatch.index || 0) + variableMatch[0].length + 1, charCount + lineOffset]);
+				tokensFound.push([i, (variableMatch.index || 0) + variableMatch[0].length + 1, charCount + lineOffset]);
 			}
 
+			// Used to keep track of the document offset. The +1 accounts for newlines.
 			charCount += lines[i].length + 1;
 		}
 
-		return retVal;
+		return tokensFound;
 	}
 
-	public static findAllVariables(document: String | undefined): string[]
+	// Find the names of all variables in the file
+	private findAllVariables(document: String | undefined): string[]
 	{
 		if (document === undefined)
 		{
@@ -120,24 +145,26 @@ export class XPathSemanticTokensProvider implements vscode.DocumentSemanticToken
 		}
 
 		const lines = document.split('\n');
-		const variableRegex = /dfdl:setVariable.*ref=\"(.*?)\"/;
-		const variableNames: string[] = [];
+		const variableRegex = /(dfdl:defineVariable.*name=\")(.*?)\"/;
+		const variables: string[] = [];
 
+		// Capture and return a list of variable names
 		for (let i = 0; i < lines.length; i++)
 		{
 			const variableMatch = lines[i].match(variableRegex);
 
 			if (variableMatch)
 			{
-				variableNames.push('$' + variableMatch[1]);
+				variables.push(variableMatch[2]);
 			}
 		}
 
-		return variableNames;
+		return variables;
 	}
 
-	private reportProblems(allTokens: Token[], document: vscode.TextDocument) {
-		let diagnostics = XsltTokenDiagnostics.calculateDiagnostics(XPathConfiguration.configuration, DocumentTypes.XPath, document, allTokens, DocumentChangeHandler.lastXMLDocumentGlobalData, XPathSemanticTokensProvider.globalInstructionData, []);
+	// This function will produce the error/warning list for vscode
+	private reportProblems(allTokens: Token[], document: vscode.TextDocument, variables: string[]) {
+		let diagnostics = XsltTokenDiagnostics.calculateDiagnostics(XPathConfiguration.configuration, DocumentTypes.XPath, document, allTokens, DocumentChangeHandler.lastXMLDocumentGlobalData, XPathSemanticTokensProvider.globalInstructionData, [], variables);
 		if (diagnostics.length > 0) {
 			this.collection.set(document.uri, diagnostics);
 		} else {
@@ -158,7 +185,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const xpathDiagnosticsCollection = vscode.languages.createDiagnosticCollection('dfdl');
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'dfdl' }, new XPathSemanticTokensProvider(xpathDiagnosticsCollection), legend));
-	context.subscriptions.push(vscode.commands.registerCommand('dfdl.setVariableNames', (...args) => XPathSemanticTokensProvider.setVariableNames(XPathSemanticTokensProvider.findAllVariables(activeEditor?.document.getText()))));
 
 	const elementCompletionProvider = vscode.languages.registerCompletionItemProvider('dfdl', {
 

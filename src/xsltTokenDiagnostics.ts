@@ -226,7 +226,7 @@ export class XsltTokenDiagnostics {
         return valid;
     }
 
-    public static calculateDiagnostics = (languageConfig: LanguageConfiguration, docType: DocumentTypes, document: vscode.TextDocument, allTokens: BaseToken[], globalInstructionData: GlobalInstructionData[], importedInstructionData: GlobalInstructionData[], symbols: vscode.DocumentSymbol[]): vscode.Diagnostic[] => {
+    public static calculateDiagnostics = (languageConfig: LanguageConfiguration, docType: DocumentTypes, document: vscode.TextDocument, allTokens: BaseToken[], globalInstructionData: GlobalInstructionData[], importedInstructionData: GlobalInstructionData[], symbols: vscode.DocumentSymbol[], globalVariables: string[]): vscode.Diagnostic[] => {
         let lineNumber = -1;
         let xslVariable = languageConfig.variableElementNames;
         let inScopeVariablesList: VariableData[] = [];
@@ -260,7 +260,7 @@ export class XsltTokenDiagnostics {
         let globalVariableData: VariableData[] = [];
         let checkedGlobalVarNames: string[] = [];
         let checkedGlobalFnNames: string[] = [];
-        let importedGlobalVarNames: string[] = [];
+        let importedGlobalVarNames: string[] = globalVariables;
         let importedGlobalFnNames: string[] = [];
         let incrementFunctionArity = false;
         let onRootStartTag = true;
