@@ -19,7 +19,7 @@
       }],
     "grammars": [{
         "language": "dfdl",
-        "scopeName": "source.dfdl.xsd",
+      "scopeName": "text.xml.dfdl.xsd",
         "path": "./syntaxes/dfdl.tmLanguage.json"
       }]
   },
