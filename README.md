@@ -105,6 +105,15 @@ None
 The base functionality for XPath Semantic Highlighting was taken from the DeltaXML Extension.
 https://github.com/DeltaXML/vscode-xslt-tokenizer
 
+## Tag Highlighting
+
+The base functionality for tag highlighting was taken from the vscode-highlight-matching-tag Extension.
+https://github.com/vincaslt/vscode-highlight-matching-tag
+
+This extension requires the moo module to be installed:
+- npm install moo
+- npm install --save @types/moo
+
 ## Known Issues
 
 The extension uses a clunky method to auto complete curly braces within quotes.  Hopefully this can be
