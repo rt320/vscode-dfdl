@@ -112,26 +112,47 @@ export class XPathSemanticTokensProvider implements vscode.DocumentSemanticToken
 		//   left curly brace. The way that the tokenizer determines when to stop processing
 		//   is to find an extra closing character (curly brace, single quote, or double quote)
 		//   If it doesn't terminate, it will tokenize the remainder of the file.
-		const valueCalcRegex = /dfdl:(out|in)putValueCalc=("|')/;
-		const setVariableRegex = /dfdl:setVariable.*value=("|')/;
+		const xPathRegex = /(\w+)=("|')(?=\{)/;
+		let isComment: Boolean = false;
 
 		for (let i = 0; i < lines.length; i++)
 		{
-			const calcMatch = lines[i].match(valueCalcRegex);
-			const variableMatch = lines[i].match(setVariableRegex);
+			let xPathMatch = lines[i].match(xPathRegex);
+
+			if (!isComment && lines[i].includes('<!--'))
+			{
+				isComment = true;
+			}
+
+			if (isComment)
+			{
+				let closeIndex = lines[i].search('-->');
+				
+				if (closeIndex !== -1)
+				{
+					isComment = false;
+					
+					if (xPathMatch)
+					{
+						if (closeIndex > lines[i].search(xPathMatch[0]))
+						{
+							xPathMatch = null;
+						}
+					}
+				}
+				else
+				{
+					xPathMatch = null;
+				}
+			}
 
 			// The items in the tuple are used to determine the start point for the tokenizer. They are
 			//   the line number, position offset in the line, and document offset.
 			// The +1 on the position offset accounts for the opening curly brace.
-			if (calcMatch)
+			if (xPathMatch)
 			{
-				const lineOffset = lines[i].search(calcMatch[0]) + calcMatch[0].length + 1;
-				tokensFound.push([i, (calcMatch.index || 0) + calcMatch[0].length + 1, charCount + lineOffset]);
-			}
-			else if (variableMatch)
-			{
-				const lineOffset = lines[i].search(variableMatch[0]) + variableMatch[0].length + 1;
-				tokensFound.push([i, (variableMatch.index || 0) + variableMatch[0].length + 1, charCount + lineOffset]);
+				const lineOffset = lines[i].search(xPathMatch[0]) + xPathMatch[0].length + 1;
+				tokensFound.push([i, (xPathMatch.index || 0) + xPathMatch[0].length + 1, charCount + lineOffset]);
 			}
 
 			// Used to keep track of the document offset. The +1 accounts for newlines.
